@@ -97,6 +97,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
                 latestImage = null
                 initialText = null
                 initialPdf = null
+                latestPdf = null
                 latestText = null
                 result.success(null)
             }
@@ -105,7 +106,6 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
     }
 
     private fun handleIntent(context: Context, intent: Intent, initial: Boolean) {
-        println(intent.type)
         when {
             intent.type?.startsWith("image") == true
                     && (intent.action == Intent.ACTION_SEND

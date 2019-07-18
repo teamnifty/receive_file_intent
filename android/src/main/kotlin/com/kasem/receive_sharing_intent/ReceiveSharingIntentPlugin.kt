@@ -16,6 +16,9 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         MethodCallHandler,
         EventChannel.StreamHandler,
         PluginRegistry.NewIntentListener {
+    
+    private var initialPdf: ArrayList<String>? = null 
+    private var latestPdf: ArrayList<String>? = null
 
     private var initialImage: ArrayList<String>? = null
     private var latestImage: ArrayList<String>? = null
@@ -25,6 +28,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
 
     private var eventSinkImage: EventChannel.EventSink? = null
     private var eventSinkText: EventChannel.EventSink? = null
+    private var eventSinkPdf: EventChannel.EventSink? = null
 
     init {
         handleIntent(registrar.context(), registrar.activity().intent, true)
@@ -34,6 +38,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         when (arguments) {
             "image" -> eventSinkImage = events
             "text" -> eventSinkText = events
+            "pdf" -> eventSinkPdf = events
         }
     }
 
@@ -41,6 +46,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         when (arguments) {
             "image" -> eventSinkImage = null
             "text" -> eventSinkText = null
+            "pdf" -> eventSinkPdf = null
         }
     }
 
@@ -53,6 +59,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         private val MESSAGES_CHANNEL = "receive_sharing_intent/messages"
         private val EVENTS_CHANNEL_IMAGE = "receive_sharing_intent/events-image"
         private val EVENTS_CHANNEL_TEXT = "receive_sharing_intent/events-text"
+        private val EVENTS_CHANNEL_PDF = "receive_sharing_intent/events-pdf"
 
         @JvmStatic
         fun registerWith(registrar: Registrar) {
@@ -72,6 +79,9 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
             val eChannelText = EventChannel(registrar.messenger(), EVENTS_CHANNEL_TEXT)
             eChannelText.setStreamHandler(instance)
 
+            val eChannelPdf = EventChannel(registrar.messenger(), EVENTS_CHANNEL_PDF)
+            eChannelPdf.setStreamHandler(instance)
+
             registrar.addNewIntentListener(instance)
         }
     }
@@ -81,10 +91,12 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         when {
             call.method == "getInitialImage" -> result.success(initialImage)
             call.method == "getInitialText" -> result.success(initialText)
+            call.method == "getInitialPdf" -> result.success(initialPdf)
             call.method == "reset" -> {
                 initialImage = null
                 latestImage = null
                 initialText = null
+                initialPdf = null
                 latestText = null
                 result.success(null)
             }
@@ -93,15 +105,24 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
     }
 
     private fun handleIntent(context: Context, intent: Intent, initial: Boolean) {
+        println(intent.type)
         when {
             intent.type?.startsWith("image") == true
                     && (intent.action == Intent.ACTION_SEND
                     || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing images
 
-                val value = getImageUris(context, intent)
+                val value = getFileUris(context, intent)
                 if (initial) initialImage = value
                 latestImage = value
                 eventSinkImage?.success(latestImage)
+            }
+            intent.type?.startsWith("application/pdf") == true 
+                    && (intent.action == Intent.ACTION_SEND
+                    || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing pdfs
+                val value = getFileUris(context, intent)
+                if (initial) initialPdf = value
+                latestPdf = value
+                eventSinkPdf?.success(latestPdf)
             }
             (intent.type == null || intent.type?.startsWith("text") == true)
                     && intent.action == Intent.ACTION_SEND -> { // Sharing text
@@ -119,7 +140,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         }
     }
 
-    private fun getImageUris(context: Context, intent: Intent?): ArrayList<String>? {
+    private fun getFileUris(context: Context, intent: Intent?): ArrayList<String>? {
         if (intent == null) return null
 
         return when {

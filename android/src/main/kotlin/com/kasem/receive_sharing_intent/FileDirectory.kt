@@ -42,12 +42,25 @@ object FileDirectory {
 
                 // TODO handle non-primary volumes
             } else if (isDownloadsDocument(uri)) {
-
-                val id = DocumentsContract.getDocumentId(uri)
-                val contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), java.lang.Long.valueOf(id))
-
-                return getDataColumn(context, contentUri, null, null)
+                val fileName = uri.getPath().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                if (fileName[0].startsWith("/document/raw") && fileName.size > 1) { // use file path directly if raw path is provided
+                    return fileName[1]
+                } else {
+                    val id = DocumentsContract.getDocumentId(uri)
+                    var contentUri: Uri
+                    var longId: Long = 0
+                    try {
+                        longId = java.lang.Long.valueOf(id)
+                    } catch (e: Exception) {
+                        println("catched exception %s, splitting the id now".format(e.toString()))
+                        val split = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                        longId = java.lang.Long.valueOf(split[1])
+                    } finally {
+                        contentUri = ContentUris.withAppendedId(
+                            Uri.parse("content://downloads/public_downloads"), longId)
+                    }
+                    return getDataColumn(context, contentUri, null, null)
+                }
             } else if (isMediaDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

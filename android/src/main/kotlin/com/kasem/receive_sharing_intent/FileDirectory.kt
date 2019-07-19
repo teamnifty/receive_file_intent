@@ -38,29 +38,57 @@ object FileDirectory {
 
                 if ("primary".equals(type, ignoreCase = true)) {
                     return Environment.getExternalStorageDirectory().toString() + "/" + split[1]
+                } else if ("home".equals(type, ignoreCase = true)) {
+                    return Environment.getExternalStorageDirectory().toString() + "/documents/" + split[1]
                 }
 
                 // TODO handle non-primary volumes
             } else if (isDownloadsDocument(uri)) {
-                val fileName = uri.getPath().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                if (fileName[0].startsWith("/document/raw") && fileName.size > 1) { // use file path directly if raw path is provided
-                    return fileName[1]
-                } else {
-                    val id = DocumentsContract.getDocumentId(uri)
-                    var contentUri: Uri
-                    var longId: Long = 0
-                    try {
-                        longId = java.lang.Long.valueOf(id)
-                    } catch (e: Exception) {
-                        println("catched exception %s, splitting the id now".format(e.toString()))
-                        val split = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                        longId = java.lang.Long.valueOf(split[1])
-                    } finally {
-                        contentUri = ContentUris.withAppendedId(
-                            Uri.parse("content://downloads/public_downloads"), longId)
-                    }
-                    return getDataColumn(context, contentUri, null, null)
+                val fileNameSplit = uri.getPath().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                if (fileNameSplit[0].startsWith("/document/raw") && fileNameSplit.size > 1) { // use file path directly if raw path is provided
+                    return fileNameSplit[1]
                 }
+                val id = DocumentsContract.getDocumentId(uri)
+                var contentUri: Uri
+                var longId: Long = 0
+                
+                //  the different [ContentUri] base paths
+                val contentUriPrefixesToTry: Array<String> = arrayOf(
+                    "content://downloads/public_downloads",
+                    "content://downloads/my_downloads"
+                )
+                
+                // try parsing cause ids tend to have chars sometimes
+                try {
+                    longId = java.lang.Long.valueOf(id)
+                } catch (e: Exception) {
+                    println("catched exception %s, splitting the id now".format(e.toString()))
+                    val split = id.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    longId = java.lang.Long.valueOf(split[1])
+                }
+
+                // now try for the different [ContentUri]s we have and return if a path is found
+                for (contentUriPrefix in contentUriPrefixesToTry) {
+                    try {
+                        contentUri = ContentUris.withAppendedId(Uri.parse(contentUriPrefix), longId)
+                        val path = getDataColumn(context, contentUri, null, null)
+                        if (path != null) {
+                            return path
+                        }
+                    } catch (e: Exception) {
+                        println(e.toString())
+                    }
+                }
+
+                // path could not be retrieved using ContentResolver, therefore copy file to accessible cache using streams
+                val pathSplit = uri.getPath().split("/")
+                val targetFile = File(context.cacheDir, pathSplit[pathSplit.size - 1])
+                context.contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(targetFile).use { fileOut ->
+                        input.copyTo(fileOut)
+                    }
+                }
+                return targetFile.path
             } else if (isMediaDocument(uri)) {
                 val docId = DocumentsContract.getDocumentId(uri)
                 val split = docId.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
@@ -126,7 +154,6 @@ object FileDirectory {
         }
         return null
     }
-
 
     /**
      * @param uri The Uri to check.

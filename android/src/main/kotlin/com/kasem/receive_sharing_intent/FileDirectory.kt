@@ -88,7 +88,8 @@ object FileDirectory {
                               selectionArgs: Array<String>?): String? {
 
         if (uri.authority != null) {
-            val targetFile = File(context.cacheDir, "IMG_${Date().time}.png")
+            val pathSplit = uri.getPath().split("/")
+            val targetFile = File(context.cacheDir, pathSplit[pathSplit.size - 1])
             context.contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(targetFile).use { fileOut ->
                     input.copyTo(fileOut)

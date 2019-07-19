@@ -81,8 +81,7 @@ object FileDirectory {
                 }
 
                 // path could not be retrieved using ContentResolver, therefore copy file to accessible cache using streams
-                val pathSplit = uri.getPath().split("/")
-                val targetFile = File(context.cacheDir, pathSplit[pathSplit.size - 1])
+                val targetFile = File(context.cacheDir, "DOC_${Date().time}.pdf")
                 context.contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(targetFile).use { fileOut ->
                         input.copyTo(fileOut)
@@ -129,8 +128,17 @@ object FileDirectory {
                               selectionArgs: Array<String>?): String? {
 
         if (uri.authority != null) {
+            var targetFileName: String? = null
             val pathSplit = uri.getPath().split("/")
-            val targetFile = File(context.cacheDir, pathSplit[pathSplit.size - 1])
+            targetFileName = pathSplit[pathSplit.size - 1]
+            if (pathSplit[pathSplit.size - 1].contains(Regex("^[0-9]*$"))) {
+                if (uri.authority.equals("media")) {
+                    targetFileName = "IMG_${Date().time}.png"
+                } else if (uri.authority.equals("downloads")) {
+                    targetFileName = "DOC_${Date().time}.pdf"
+                }
+            } 
+            val targetFile = File(context.cacheDir, targetFileName)
             context.contentResolver.openInputStream(uri)?.use { input ->
                 FileOutputStream(targetFile).use { fileOut ->
                     input.copyTo(fileOut)

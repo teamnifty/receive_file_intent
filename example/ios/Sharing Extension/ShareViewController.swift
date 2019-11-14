@@ -13,37 +13,31 @@ import Photos
 
 class ShareViewController: SLComposeServiceViewController {
     // TODO: IMPORTANT: This should be your host app bundle identifier
-    let hostAppBundleIdentifier = "com.kasem.sharing"
+    let hostAppBundleIdentifier = "com.craftbuddy"
     let sharedKey = "ShareKey"
     var sharedData: [String] = []
     let imageContentType = kUTTypeImage as String
     let textContentType = kUTTypeText as String
     let urlContentType = kUTTypeURL as String
+    let fileContentType = kUTTypeItem as String
     
     override func isContentValid() -> Bool {
         return true
     }
     
-    override func viewDidLoad() {
+    override func didSelectPost() {
         // This is called after the user selects Post. Do the upload of contentText and/or NSExtensionContext attachments.
         
         if let content = extensionContext!.inputItems[0] as? NSExtensionItem {
             if let contents = content.attachments {
                 for (index, attachment) in (contents as! [NSItemProvider]).enumerated() {
-                    
-                    if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
-                        handleImages(content: content, attachment: attachment, index: index)
-                    } else if attachment.hasItemConformingToTypeIdentifier(textContentType) {
-                        handleText(content: content, attachment: attachment, index: index)
-                    } else if attachment.hasItemConformingToTypeIdentifier(urlContentType) {
-                        handleUrl(content: content, attachment: attachment, index: index)
-                    }
+                        handleFiles(content: content, attachment: attachment, index: index)
                 }
             }
         }
     }
     
-    override func didSelectPost() {
+    override func viewDidLoad() {
         print("didSelectPost");
     }
     
@@ -52,62 +46,16 @@ class ShareViewController: SLComposeServiceViewController {
         return []
     }
     
-    private func handleText (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
-        attachment.loadItem(forTypeIdentifier: textContentType, options: nil) { [weak self] data, error in
-            
-            if error == nil, let item = data as? String, let this = self {
-                
-                this.sharedData.append(item)
-                
-                // If this is the last item, save imagesData in userDefaults and redirect to host app
-                if index == (content.attachments?.count)! - 1 {
-                    let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
-                    userDefaults?.set(this.sharedData, forKey: this.sharedKey)
-                    userDefaults?.synchronize()
-                    this.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
-                    this.redirectToHostApp(type: .text)
-                }
-                
-            } else {
-                self?.dismissWithError()
-            }
-        }
-    }
     
-    private func handleUrl (content: NSExtensionItem, attachment: NSItemProvider, index: Int) {
+    private func handleFiles (content: NSExtensionItem, attachment: NSItemProvider, index: Int){
         attachment.loadItem(forTypeIdentifier: urlContentType, options: nil) { [weak self] data, error in
-            
-            if error == nil, let item = data as? URL, let this = self {
-                
-                this.sharedData.append(item.absoluteString)
-                
-                // If this is the last item, save imagesData in userDefaults and redirect to host app
-                if index == (content.attachments?.count)! - 1 {
-                    let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
-                    userDefaults?.set(this.sharedData, forKey: this.sharedKey)
-                    userDefaults?.synchronize()
-                    this.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
-                    this.redirectToHostApp(type: .text)
-                }
-                
-            } else {
-                self?.dismissWithError()
-            }
-        }
-    }
-    
-    private func handleImages (content: NSExtensionItem, attachment: NSItemProvider, index: Int){
-        attachment.loadItem(forTypeIdentifier: imageContentType, options: nil) { [weak self] data, error in
             
             if error == nil, let url = data as? URL, let this = self {
                 
-                for component in url.path.components(separatedBy: "/") where component.contains("IMG_") {
+                for component in url.path.components(separatedBy: "/") where component.contains(".pdf") {
                     
-                    // photo: /var/mobile/Media/DCIM/101APPLE/IMG_1320.PNG
-                    // edited photo: /var/mobile/Media/PhotoData/Mutations/DCIM/101APPLE/IMG_1309/Adjustments/FullSizeRender.jpg
-                    
-                    // cut file's suffix if have, get file name like IMG_1309.
-                    let fileName = component.components(separatedBy: ".").first!
+                    //let fileName = component.components(separatedBy: ".").first!
+                    let fileName = component
                     if let asset = this.imageAssetDictionary[fileName] {
                         this.sharedData.append( asset.localIdentifier)
                     } else {
@@ -125,12 +73,14 @@ class ShareViewController: SLComposeServiceViewController {
                 // If this is the last item, save imagesData in userDefaults and redirect to host app
                 if index == (content.attachments?.count)! - 1 {
                     // TODO: IMPROTANT: This should be your host app bundle identiefier
-                    let hostAppBundleIdentiefier = "com.kasem.sharing"
-                    let userDefaults = UserDefaults(suiteName: "group.\(hostAppBundleIdentiefier)")
+                    //let hostAppBundleIdentiefier = "com.craftbuddy"
+                    let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
                     userDefaults?.set(this.sharedData, forKey: this.sharedKey)
                     userDefaults?.synchronize()
                     this.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
-                    this.redirectToHostApp(type: .image)
+                    this.redirectToHostApp(type: .text)
+                } else {
+                    self?.dismissWithError()
                 }
                 
             } else {

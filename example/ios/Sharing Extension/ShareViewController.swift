@@ -31,7 +31,11 @@ class ShareViewController: SLComposeServiceViewController {
         if let content = extensionContext!.inputItems[0] as? NSExtensionItem {
             if let contents = content.attachments {
                 for (index, attachment) in (contents as! [NSItemProvider]).enumerated() {
+                    if attachment.hasItemConformingToTypeIdentifier(imageContentType) {
+                        handleImages(content: content, attachment: attachment, index: index)
+                    } else {
                         handleFiles(content: content, attachment: attachment, index: index)
+                    }
                 }
             }
         }
@@ -52,28 +56,27 @@ class ShareViewController: SLComposeServiceViewController {
             
             if error == nil, let url = data as? URL, let this = self {
                 
-                for component in url.path.components(separatedBy: "/") where component.contains(".pdf") {
-                    
-                    //let fileName = component.components(separatedBy: ".").first!
-                    let fileName = component
-                    if let asset = this.imageAssetDictionary[fileName] {
+                //for component in url.path.components(separatedBy: "/") where component.contains(".pdf") {
+                let componentList = url.path.components(separatedBy: "/")
+                let component = componentList.last
+                //let fileName = component.components(separatedBy: ".").first!
+                let fileName = component
+                if let asset = this.imageAssetDictionary[fileName!] {
                         this.sharedData.append( asset.localIdentifier)
                     } else {
                         // If we could not find the file then copy it
                         let newPath = FileManager.default
-                            .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!.appendingPathComponent(fileName)
+                            .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!.appendingPathComponent(fileName!)
                         let copied = this.copyFile(at: url, to: newPath)
                         if(copied) {
                             this.sharedData.append(newPath.absoluteString)
                         }
                     }
-                    break
-                }
+                    //break
+                //}
                 
                 // If this is the last item, save imagesData in userDefaults and redirect to host app
                 if index == (content.attachments?.count)! - 1 {
-                    // TODO: IMPROTANT: This should be your host app bundle identiefier
-                    //let hostAppBundleIdentiefier = "com.craftbuddy"
                     let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
                     userDefaults?.set(this.sharedData, forKey: this.sharedKey)
                     userDefaults?.synchronize()
@@ -81,6 +84,42 @@ class ShareViewController: SLComposeServiceViewController {
                     this.redirectToHostApp(type: .text)
                 } else {
                     self?.dismissWithError()
+                }
+                
+            } else {
+                self?.dismissWithError()
+            }
+        }
+    }
+    
+    private func handleImages (content: NSExtensionItem, attachment: NSItemProvider, index: Int){
+        attachment.loadItem(forTypeIdentifier: imageContentType, options: nil) { [weak self] data, error in
+            if error == nil, let url = data as? URL, let this = self {
+                //for component in url.path.components(separatedBy: "/") where component.contains("IMG_") {
+                let componentList = url.path.components(separatedBy: "/")
+                let component = componentList.last
+                //let fileName = component!.components(separatedBy: ".").first!
+                let fileName = component
+                if let asset = this.imageAssetDictionary[fileName!] {
+                    this.sharedData.append( asset.localIdentifier)
+                } else {
+                    // If we could not find the file then copy it
+                    let newPath = FileManager.default
+                        .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!.appendingPathComponent(fileName!)
+                    let copied = this.copyFile(at: url, to: newPath)
+                    if(copied) {
+                        this.sharedData.append(newPath.absoluteString)
+                    }
+                }
+                   // break
+                //}
+                // If this is the last item, save imagesData in userDefaults and redirect to host app
+                if index == (content.attachments?.count)! - 1 {
+                    let userDefaults = UserDefaults(suiteName: "group.\(this.hostAppBundleIdentifier)")
+                    userDefaults?.set(this.sharedData, forKey: this.sharedKey)
+                    userDefaults?.synchronize()
+                    this.extensionContext!.completeRequest(returningItems: [], completionHandler: nil)
+                    this.redirectToHostApp(type: .text)
                 }
                 
             } else {

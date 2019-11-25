@@ -16,9 +16,6 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         MethodCallHandler,
         EventChannel.StreamHandler,
         PluginRegistry.NewIntentListener {
-    
-    private var initialPdf: ArrayList<String>? = null 
-    private var latestPdf: ArrayList<String>? = null
 
     private var initialImage: ArrayList<String>? = null
     private var latestImage: ArrayList<String>? = null
@@ -26,9 +23,16 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
     private var initialText: String? = null
     private var latestText: String? = null
 
+    private var initialPdf: ArrayList<String>? = null
+    private var latestPdf: ArrayList<String>? = null
+
+    private var initialFile: ArrayList<String>? = null
+    private var latestFile: ArrayList<String>? = null
+
     private var eventSinkImage: EventChannel.EventSink? = null
     private var eventSinkText: EventChannel.EventSink? = null
     private var eventSinkPdf: EventChannel.EventSink? = null
+    private var eventSinkFile: EventChannel.EventSink? = null
 
     init {
         handleIntent(registrar.context(), registrar.activity().intent, true)
@@ -39,6 +43,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
             "image" -> eventSinkImage = events
             "text" -> eventSinkText = events
             "pdf" -> eventSinkPdf = events
+            "file" -> eventSinkFile = events
         }
     }
 
@@ -47,6 +52,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
             "image" -> eventSinkImage = null
             "text" -> eventSinkText = null
             "pdf" -> eventSinkPdf = null
+            "file" -> eventSinkFile = null
         }
     }
 
@@ -60,6 +66,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         private val EVENTS_CHANNEL_IMAGE = "receive_sharing_intent/events-image"
         private val EVENTS_CHANNEL_TEXT = "receive_sharing_intent/events-text"
         private val EVENTS_CHANNEL_PDF = "receive_sharing_intent/events-pdf"
+        private val EVENTS_CHANNEL_FILE = "receive_sharing_intent/events-file"
 
         @JvmStatic
         fun registerWith(registrar: Registrar) {
@@ -82,6 +89,9 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
             val eChannelPdf = EventChannel(registrar.messenger(), EVENTS_CHANNEL_PDF)
             eChannelPdf.setStreamHandler(instance)
 
+            val eChannelFile = EventChannel(registrar.messenger(), EVENTS_CHANNEL_FILE)
+            eChannelFile.setStreamHandler(instance)
+
             registrar.addNewIntentListener(instance)
         }
     }
@@ -92,13 +102,16 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
             call.method == "getInitialImage" -> result.success(initialImage)
             call.method == "getInitialText" -> result.success(initialText)
             call.method == "getInitialPdf" -> result.success(initialPdf)
+            call.method == "getInitialFile" -> result.success(initialFile)
             call.method == "reset" -> {
                 initialImage = null
                 latestImage = null
                 initialText = null
+                latestText = null
                 initialPdf = null
                 latestPdf = null
-                latestText = null
+                initialFile = null
+                latestFile = null
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -116,7 +129,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
                 latestImage = value
                 eventSinkImage?.success(latestImage)
             }
-            intent.type?.startsWith("application/pdf") == true 
+            intent.type?.startsWith("application/pdf") == true
                     && (intent.action == Intent.ACTION_SEND
                     || intent.action == Intent.ACTION_SEND_MULTIPLE) -> { // Sharing pdfs
                 val value = getFileUris(context, intent)
@@ -131,11 +144,17 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
                 latestText = value
                 eventSinkText?.success(latestText)
             }
-            intent.action == Intent.ACTION_VIEW -> { // Opening URL
+/*            intent.action == Intent.ACTION_VIEW -> { // Opening URL
                 val value = intent.dataString
                 if (initial) initialText = value
                 latestText = value
                 eventSinkText?.success(latestText)
+            }*/
+            else -> {
+                val value = getFileUris(context, intent)
+                if (initial) initialFile = value
+                latestFile = value
+                eventSinkFile?.success(latestFile)
             }
         }
     }

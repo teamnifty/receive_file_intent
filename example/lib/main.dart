@@ -14,21 +14,10 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription _intentDataStreamSubscription;
   List<String> _sharedFiles;
   dynamic _sharedText;
-  List<String> _sharedPdfs;
 
   @override
   void initState() {
     super.initState();
-
-    // For sharing images coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.getImageStream().listen((List<String> value) {
-      setState(() {
-        _sharedFiles = value;
-        //dynamic test = File(value.first);
-      });
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-    });
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getTextStream().listen((value) {
@@ -39,29 +28,13 @@ class _MyAppState extends State<MyApp> {
       print("getLinkStream error: $err");
     });
 
-    // For sharing pdfs coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.getPdfStream().listen((List<String> value) {
-      setState(() {
-        _sharedPdfs = value;
-      });
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-    });
-
-    // For sharing pdfs coming from outside the app while the app is in the memory
+    // For sharing files coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getFileStream().listen((List<String> value) {
       setState(() {
         _sharedFiles = value;
       });
     }, onError: (err) {
       print("getIntentDataStream error: $err");
-    });
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialImage().then((List<String> value) {
-      setState(() {
-        _sharedFiles = value;
-      });
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
@@ -71,21 +44,12 @@ class _MyAppState extends State<MyApp> {
       });
     });
 
-    // For sharing pdfs coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialPdf().then((List<String> value) {
-      setState(() {
-        _sharedPdfs = value;
-      });
-    });
-
     // For sharing files coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialFile().then((List<String> value) {
       setState(() {
         _sharedFiles = value;
       });
     });
-
-
   }
 
   @override
@@ -111,8 +75,6 @@ class _MyAppState extends State<MyApp> {
               Text("Shared urls/text:", style: textStyleBold),
               Text(_sharedText ?? ""),
               SizedBox(height: 100),
-              Text("Shared pdfs:", style: textStyleBold),
-              Text(_sharedPdfs?.join(",") ?? ""),
             ],
           ),
         ),

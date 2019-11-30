@@ -5,16 +5,16 @@ import Photos
 public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     
     static let kMessagesChannel = "receive_sharing_intent/messages";
-    static let kEventsChannelImage = "receive_sharing_intent/events-image";
+    static let kEventsChannelFile = "receive_sharing_intent/events-file";
     static let kEventsChannelLink = "receive_sharing_intent/events-text";
     
-    private var initialImage: [String]? = nil
-    private var latestImage: [String]? = nil
+    private var initialFile: [String]? = nil
+    private var latestFile: [String]? = nil
     
     private var initialText: String? = nil
     private var latestText: String? = nil
     
-    private var eventSinkImage: FlutterEventSink? = nil;
+    private var eventSinkFile: FlutterEventSink? = nil;
     private var eventSinkText: FlutterEventSink? = nil;
     
     
@@ -24,8 +24,8 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
         let channel = FlutterMethodChannel(name: kMessagesChannel, binaryMessenger: registrar.messenger())
         registrar.addMethodCallDelegate(instance, channel: channel)
         
-        let chargingChannelImage = FlutterEventChannel(name: kEventsChannelImage, binaryMessenger: registrar.messenger())
-        chargingChannelImage.setStreamHandler(instance)
+        let chargingChannelFile = FlutterEventChannel(name: kEventsChannelFile, binaryMessenger: registrar.messenger())
+        chargingChannelFile.setStreamHandler(instance)
         
         let chargingChannelLink = FlutterEventChannel(name: kEventsChannelLink, binaryMessenger: registrar.messenger())
         chargingChannelLink.setStreamHandler(instance)
@@ -36,13 +36,13 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         
         switch call.method {
-        case "getInitialImage":
-            result(self.initialImage);
+        case "getInitialFile":
+            result(self.initialFile);
         case "getInitialText":
             result(self.initialText);
         case "reset":
-            self.initialImage = nil
-            self.latestImage = nil
+            self.initialFile = nil
+            self.latestFile = nil
             self.initialText = nil
             self.latestText = nil
             result(nil);
@@ -78,17 +78,7 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
         if let url = url {
             let appDomain = Bundle.main.bundleIdentifier!
             let userDefaults = UserDefaults(suiteName: "group.\(appDomain)")
-            if url.fragment == "image" {
-                if let key = url.host?.components(separatedBy: "=").last,
-                    let sharedArray = userDefaults?.object(forKey: key) as? [String] {
-                    let absoluteUrls = sharedArray.compactMap{getAbsolutePath(for: $0)}
-                    latestImage = absoluteUrls
-                    if(setInitialData) {
-                        initialImage = latestImage
-                    }
-                    eventSinkImage?(latestImage)
-                }
-            } else if url.fragment == "text" {
+            if url.fragment == "text" {
                 if let key = url.host?.components(separatedBy: "=").last,
                     let sharedArray = userDefaults?.object(forKey: key) as? [String] {
                     latestText =  sharedArray.joined(separator: ",")
@@ -98,39 +88,39 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
                     eventSinkText?(latestText)
                 }
             } else {
-                latestText = url.absoluteString
-                if(setInitialData) {
-                    initialText = latestText
+                if let key = url.host?.components(separatedBy: "=").last,
+                    let sharedArray = userDefaults?.object(forKey: key) as? [String] {
+                    let absoluteUrls = sharedArray.compactMap{getAbsolutePath(for: $0)}
+                    latestFile = absoluteUrls
+                    if(setInitialData) {
+                        initialFile = latestFile
+                    }
+                    eventSinkFile?(latestFile)
                 }
-                eventSinkText?(latestText)
             }
             return true
         }
         
-        latestImage = nil
+        latestFile = nil
         latestText = nil
         return false
     }
     
     
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        if (arguments as! String? == "image") {
-            eventSinkImage = events;
-        } else if (arguments as! String? == "text") {
+       if (arguments as! String? == "text") {
             eventSinkText = events;
         } else {
-            return FlutterError.init(code: "NO_SUCH_ARGUMENT", message: "No such argument\(String(describing: arguments))", details: nil);
+            eventSinkFile = events;
         }
         return nil;
     }
     
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        if (arguments as! String? == "image") {
-            eventSinkImage = nil;
-        } else if (arguments as! String? == "text") {
+        if (arguments as! String? == "text") {
             eventSinkText = nil;
         } else {
-            return FlutterError.init(code: "NO_SUCH_ARGUMENT", message: "No such argument as \(String(describing: arguments))", details: nil);
+            eventSinkFile = nil;
         }
         return nil;
     }

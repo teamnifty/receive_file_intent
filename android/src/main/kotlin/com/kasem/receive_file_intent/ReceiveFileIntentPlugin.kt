@@ -1,4 +1,4 @@
-package com.kasem.receive_sharing_intent
+package com.teamnifty.receive_file_intent
 
 import android.content.Context
 import android.content.Intent
@@ -12,7 +12,7 @@ import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import java.util.*
 
-class ReceiveSharingIntentPlugin(val registrar: Registrar) :
+class ReceiveFileIntentPlugin(val registrar: Registrar) :
         MethodCallHandler,
         EventChannel.StreamHandler,
         PluginRegistry.NewIntentListener {
@@ -50,9 +50,9 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
     }
 
     companion object {
-        private val MESSAGES_CHANNEL = "receive_sharing_intent/messages"
-        private val EVENTS_CHANNEL_TEXT = "receive_sharing_intent/events-text"
-        private val EVENTS_CHANNEL_FILE = "receive_sharing_intent/events-file"
+        private val MESSAGES_CHANNEL = "receive_file_intent/messages"
+        private val EVENTS_CHANNEL_TEXT = "receive_file_intent/events-text"
+        private val EVENTS_CHANNEL_FILE = "receive_file_intent/events-file"
 
         @JvmStatic
         fun registerWith(registrar: Registrar) {
@@ -61,7 +61,7 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
                 return
             }
 
-            val instance = ReceiveSharingIntentPlugin(registrar)
+            val instance = ReceiveFileIntentPlugin(registrar)
 
             val mChannel = MethodChannel(registrar.messenger(), MESSAGES_CHANNEL)
             mChannel.setMethodCallHandler(instance)

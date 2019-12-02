@@ -1,8 +1,8 @@
-#import "ReceiveSharingIntentPlugin.h"
-#import <receive_sharing_intent/receive_sharing_intent-Swift.h>
+#import "ReceiveFileIntentPlugin.h"
+#import <receive_file_intent/receive_file_intent-Swift.h>
 
-@implementation ReceiveSharingIntentPlugin
+@implementation ReceiveFileIntentPlugin
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
-  [SwiftReceiveSharingIntentPlugin registerWithRegistrar:registrar];
+  [SwiftReceiveFileIntentPlugin registerWithRegistrar:registrar];
 }
 @end

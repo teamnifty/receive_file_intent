@@ -1,5 +1,5 @@
-name: receive_sharing_intent_example
-description: Demonstrates how to use the receive_sharing_intent plugin.
+name: receive_file_intent_example
+description: Demonstrates how to use the receive_file_intent plugin.
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -19,7 +19,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-  receive_sharing_intent:
+  receive_file_intent:
     path: ../
 
 # For information on the generic Dart part of this file, see the

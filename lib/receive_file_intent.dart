@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-class ReceiveSharingIntent {
-  static const MethodChannel _mChannel = const MethodChannel('receive_sharing_intent/messages');
-  static const EventChannel _eChannelLink = const EventChannel("receive_sharing_intent/events-text");
-  static const EventChannel _eChannelFile = const EventChannel("receive_sharing_intent/events-file");
+class ReceiveFileIntent {
+  static const MethodChannel _mChannel = const MethodChannel('receive_file_intent/messages');
+  static const EventChannel _eChannelLink = const EventChannel("receive_file_intent/events-text");
+  static const EventChannel _eChannelFile = const EventChannel("receive_file_intent/events-file");
 
   static Stream<String> _streamLink;
   static Stream<List<String>> _streamFile;

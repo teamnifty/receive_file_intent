@@ -1,4 +1,4 @@
 #import <Flutter/Flutter.h>
 
-@interface ReceiveSharingIntentPlugin : NSObject<FlutterPlugin>
+@interface ReceiveFileIntentPlugin : NSObject<FlutterPlugin>
 @end

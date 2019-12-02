@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.kasem.receive_sharing_intent_example">
+    package="com.teamnifty.receive_file_intent_example">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
@@ -10,7 +10,7 @@
          FlutterApplication and put your custom class here. -->
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="receive_sharing_intent_example"
+        android:label="receive_file_intent_example"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

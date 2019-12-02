@@ -1,4 +1,4 @@
-group 'com.kasem.receive_sharing_intent'
+group 'com.teamnifty.receive_file_intent'
 version '1.0-SNAPSHOT'
 
 buildscript {

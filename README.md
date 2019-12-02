@@ -1,4 +1,4 @@
-# receive_sharing_intent
+# receive_file_intent
 
 A flutter plugin that enables flutter apps to receive sharing photos, text and urls from other apps.
 

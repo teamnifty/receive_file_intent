@@ -2,11 +2,11 @@ import Flutter
 import UIKit
 import Photos
 
-public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
+public class SwiftReceiveFileIntentPlugin: NSObject, FlutterPlugin, FlutterStreamHandler {
     
-    static let kMessagesChannel = "receive_sharing_intent/messages";
-    static let kEventsChannelFile = "receive_sharing_intent/events-file";
-    static let kEventsChannelLink = "receive_sharing_intent/events-text";
+    static let kMessagesChannel = "receive_file_intent/messages";
+    static let kEventsChannelFile = "receive_file_intent/events-file";
+    static let kEventsChannelLink = "receive_file_intent/events-text";
     
     private var initialFile: [String]? = nil
     private var latestFile: [String]? = nil
@@ -19,7 +19,7 @@ public class SwiftReceiveSharingIntentPlugin: NSObject, FlutterPlugin, FlutterSt
     
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let instance = SwiftReceiveSharingIntentPlugin()
+        let instance = SwiftReceiveFileIntentPlugin()
         
         let channel = FlutterMethodChannel(name: kMessagesChannel, binaryMessenger: registrar.messenger())
         registrar.addMethodCallDelegate(instance, channel: channel)

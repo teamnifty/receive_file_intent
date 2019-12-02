@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:receive_file_intent/receive_file_intent.dart';
 import 'dart:io';
 
 void main() => runApp(MyApp());
@@ -22,7 +22,7 @@ class _MyAppState extends State<MyApp> {
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((value) {
+        ReceiveFileIntent.getTextStream().listen((value) {
       setState(() {
         _sharedText = value;
       });
@@ -32,7 +32,7 @@ class _MyAppState extends State<MyApp> {
 
     // For sharing files coming from outside the app while the app is in the memory
     _intentDataStreamSubscription =
-        ReceiveSharingIntent.getFileStream().listen((List<String> value) {
+        ReceiveFileIntent.getFileStream().listen((List<String> value) {
       setState(() {
         _sharedFiles = value;
       });
@@ -41,14 +41,14 @@ class _MyAppState extends State<MyApp> {
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String value) {
+    ReceiveFileIntent.getInitialText().then((String value) {
       setState(() {
         _sharedText = value;
       });
     });
 
     // For sharing files coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialFile().then((List<String> value) {
+    ReceiveFileIntent.getInitialFile().then((List<String> value) {
       setState(() {
         _sharedFiles = value;
       });

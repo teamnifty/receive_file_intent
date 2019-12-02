@@ -1,4 +1,4 @@
-package com.kasem.receive_sharing_intent_example
+package com.teamnifty.receive_file_intent_example
 
 import android.os.Bundle
 

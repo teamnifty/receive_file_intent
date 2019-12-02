@@ -81,7 +81,7 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.5"
-  receive_sharing_intent:
+  receive_file_intent:
     dependency: "direct dev"
     description:
       path: ".."

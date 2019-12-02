@@ -1,4 +1,4 @@
-package com.kasem.receive_sharing_intent
+package com.teamnifty.receive_file_intent
 
 import android.content.ContentUris
 import android.content.Context

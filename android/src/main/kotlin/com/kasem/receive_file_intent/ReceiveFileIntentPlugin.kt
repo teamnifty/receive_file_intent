@@ -100,12 +100,6 @@ class ReceiveFileIntentPlugin(val registrar: Registrar) :
                 latestText = value
                 eventSinkText?.success(latestText)
             }
-            intent.action == Intent.ACTION_VIEW -> { // Opening URL
-                val value = intent.dataString
-                if (initial) initialText = value
-                latestText = value
-                eventSinkText?.success(latestText)
-            }
             else -> { // File
                 val value = getFileUris(context, intent)
                 if (initial) initialFile = value
@@ -121,8 +115,8 @@ class ReceiveFileIntentPlugin(val registrar: Registrar) :
         return when {
             intent.action == Intent.ACTION_SEND -> {
                 val uri = intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
-                val absolute = FileDirectory.getAbsolutePath(context, uri)
-                if (absolute != null) arrayListOf(absolute) else null
+                val path = FileDirectory.getAbsolutePath(context, uri)
+                if (path != null) arrayListOf(path) else null
             }
             intent.action == Intent.ACTION_SEND_MULTIPLE -> {
                 val uris = intent.getParcelableArrayListExtra<Uri>(Intent.EXTRA_STREAM)

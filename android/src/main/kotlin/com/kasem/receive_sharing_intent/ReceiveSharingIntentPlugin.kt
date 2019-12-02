@@ -76,7 +76,6 @@ class ReceiveSharingIntentPlugin(val registrar: Registrar) :
         }
     }
 
-
     override fun onMethodCall(call: MethodCall, result: Result) {
         when {
             call.method == "getInitialText" -> result.success(initialText)

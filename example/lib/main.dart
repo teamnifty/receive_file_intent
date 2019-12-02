@@ -21,7 +21,8 @@ class _MyAppState extends State<MyApp> {
     super.initState();
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.getTextStream().listen((value) {
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getTextStream().listen((value) {
       setState(() {
         _sharedText = value;
       });
@@ -30,7 +31,8 @@ class _MyAppState extends State<MyApp> {
     });
 
     // For sharing files coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.getFileStream().listen((List<String> value) {
+    _intentDataStreamSubscription =
+        ReceiveSharingIntent.getFileStream().listen((List<String> value) {
       setState(() {
         _sharedFiles = value;
       });

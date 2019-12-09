@@ -78,6 +78,7 @@ class _MyAppState extends State<MyApp> {
               Text("Shared urls/text:", style: textStyleBold),
               Text(_sharedText ?? ""),
               SizedBox(height: 100),
+              //if(_sharedFiles != null) Image.file(File(_sharedFiles.first))
             ],
           ),
         ),

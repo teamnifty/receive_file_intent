@@ -1,3 +1,6 @@
+## FORK Changes:
+* Every file is handlet the same way. It is copied to appgroup storage and the Path is shared into flutter.
+
 ## 1.2.0+1
 
 * New method added to reset the already consumed callbacks

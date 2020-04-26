@@ -1,4 +1,9 @@
 ## FORK Changes:
+
+* 2.1 04.2020 change percentage Strings to normal strings on iOS
+
+* 2.0 12.2020 Initial release after complete overhaul from the ShareViewController
+
 * Every file is handlet the same way. It is copied to appgroup storage and the Path is shared into flutter.
 
 ## 1.2.0+1

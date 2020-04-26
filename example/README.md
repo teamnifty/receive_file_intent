@@ -296,8 +296,9 @@ class ShareViewController: SLComposeServiceViewController {
                 let newPath = FileManager.default
                     .containerURL(forSecurityApplicationGroupIdentifier: "group.\(this.hostAppBundleIdentifier)")!.appendingPathComponent(fileName!)
                 let copied = this.copyFile(at: url, to: newPath)
+                let newPath2 = newPath.absoluteString
                 if(copied) {
-                    this.sharedData.append(newPath.absoluteString)
+                    this.sharedData.append(newPath2.removingPercentEncoding ?? "")
                 }
 
                 // If this is the last item, save file in userDefaults and redirect to host app
